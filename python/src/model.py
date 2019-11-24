@@ -4,13 +4,13 @@ from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten
 
 class MyNeuralNetwork(Sequential):
     def __init__(self, height, width):
-        super(MyNeuralNetwork, self).__init__(name='neural_network')
+        super(MyNeuralNetwork, self).__init__(name='MyNeuralNetwork')
         self.add(
             Conv2D(
                 input_shape=(width, height, 3),
                 filters=16,
-                kernel_size=3,
-                padding='valid',
+                kernel_size=7,
+                padding='same',
                 activation='relu')
         )
         self.add(
@@ -18,9 +18,9 @@ class MyNeuralNetwork(Sequential):
         )
         self.add(
             Conv2D(
-                filters=16,
-                kernel_size=3,
-                padding='valid',
+                filters=32,
+                kernel_size=5,
+                padding='same',
                 activation='relu')
         )
         self.add(
@@ -28,9 +28,9 @@ class MyNeuralNetwork(Sequential):
         )
         self.add(
             Conv2D(
-                filters=16,
+                filters=64,
                 kernel_size=3,
-                padding='valid',
+                padding='same',
                 activation='relu')
         )
         self.add(
@@ -46,6 +46,6 @@ class MyNeuralNetwork(Sequential):
         )
         self.add(
             Dense(
-                units=8,
+                units=16,
                 activation='softmax')
         )

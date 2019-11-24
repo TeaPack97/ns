@@ -1,11 +1,9 @@
 from src.model import MyNeuralNetwork
 from keras.optimizers import Adam
 from src.import_data import *
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-BATCH_SIZE = 64
-EPOCHS = 1
+BATCH_SIZE = 16
+EPOCHS = 30
 
 train_images, train_labels, test_images, test_labels = get_data()
 
@@ -16,7 +14,12 @@ model.compile(
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy'])
 
-callbacks = []
+callbacks = [
+    # TensorBoard(
+    #     log_dir="logs/" + timestamp(),
+    #     histogram_freq=1,
+    #     profile_batch=0)
+]
 
 model.fit(
     x=train_images,
@@ -27,4 +30,5 @@ model.fit(
     callbacks=callbacks,
     epochs=EPOCHS)
 
+model.save("model.h5")
 model.summary()
