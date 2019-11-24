@@ -1,1 +1,5 @@
-venv/
+*/venv/
+*/photos/
+*/.idea/
+*/.ipynb_checkpoints
+*/src/__pycache__/
