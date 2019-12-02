@@ -1,15 +1,19 @@
 import glob
 from os.path import basename
 import numpy as np
+from tqdm import tqdm
 import random as ra
 from cv2 import *
 
-HEIGHT = 85
-WIDTH = 75
+ZENA = 1
+MUZ = 0
+HEIGHT = 64
+WIDTH = 64
 DIM = (HEIGHT, WIDTH)
 
 
-def prep_img(image):
+def prep_img(file):
+    image = imread(file)
     image = resize(image, DIM)
     image = image / 255.0
     image = np.array(image)
@@ -17,6 +21,7 @@ def prep_img(image):
 
 
 def decide_age(age):
+    age = int(age)
     if age < 5:
         return 0
     if age < 10:
@@ -34,106 +39,101 @@ def decide_age(age):
     return 7
 
 
-def prep_label(age, number):
+def decide_gender(number):
     number = int(number)
-    age = int(age)
     if number < 7381:
-        return decide_age(age=age)
-    return decide_age(age=age) + 8
+        return ZENA
+    return MUZ
 
 
-def get_age_gender(name):
-    name = basename(name)
-    if name[1] == '_':
-        age = int(name[0])
-        gender = int(name[2])
-    elif name[2] == '_':
-        age = int(name[0] + name[1])
-        gender = int(name[3])
+def get_gender(file):
+    if file[1] == '_':
+        gender = int(file[2])
+    elif file[2] == '_':
+        gender = int(file[3])
     else:
-        age = int(name[0] + name[1] + name[2])
-        gender = int(name[4])
-    if gender == 1:
-        age = decide_age(age=age)
+        gender = int(file[4])
+    return gender
+
+
+def get_age(file):
+    if file[1] == '_':
+        age = int(file[0])
+    elif file[2] == '_':
+        age = int(file[0] + file[1])
     else:
-        age = decide_age(age=age) + 8
-    return age
+        age = int(file[0] + file[1] + file[2])
+    return decide_age(age=age)
 
 
-def get_photos(file, images, labels):
-    f = open(file, "r")
+def prepare_data(images, age_labels, gender_labels):
+    train_images = []
+    train_age_labels = []
+    train_gender_labels = []
+    test_images = []
+    test_age_labels = []
+    test_gender_labels = []
 
-    for x in f:
-        img = imread("D:\\Nastavenia\\Dokumenty\\STU\\4rocnik\\neu\\ns\\python\\photos\\original_images\\" + x[0:12])
-        images.append(prep_img(image=img))
-        labels.append(prep_label(age=x[6:8], number=x[0:5]))
-    f.close()
-    return
+    pom = list(zip(images, age_labels, gender_labels))
+    ra.shuffle(pom)
+    images, age_labels, gender_labels = zip(*pom)
+
+    for x in tqdm(range(len(images))):
+        if x < int(len(images) * 4 / 5):
+            train_images.append(images[x])
+            train_age_labels.append(age_labels[x])
+            train_gender_labels.append(gender_labels[x])
+        else:
+            test_images.append(images[x])
+            test_age_labels.append(age_labels[x])
+            test_gender_labels.append(gender_labels[x])
+
+    train_images = np.array(train_images)
+    train_age_labels = np.array(train_age_labels)
+    train_gender_labels = np.array(train_gender_labels)
+    test_images = np.array(test_images)
+    test_age_labels = np.array(test_age_labels)
+    test_gender_labels = np.array(test_gender_labels)
+
+    return train_images, train_age_labels, train_gender_labels, test_images, test_age_labels, test_gender_labels
+
+
+def process_dataset2():
+    images = []
+    age_labels = []
+    gender_labels = []
+
+    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")):
+        filename = basename(file)
+        images.append(prep_img(file=file))
+        age_labels.append(get_age(file=filename))
+        gender_labels.append(get_gender(file=filename))
+
+    return images, age_labels, gender_labels
+
+
+def process_dataset1():
+    images = []
+    age_labels = []
+    gender_labels = []
+
+    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")):
+        filename = basename(file)
+        images.append(prep_img(file=file))
+        age_labels.append(decide_age(age=filename[6:8]))
+        gender_labels.append(decide_gender(number=filename[0:5]))
+
+    return images, age_labels, gender_labels
 
 
 def get_data():
-    print("loading first dataset...")
-    train_images1, train_labels1, test_images1, test_labels1 = get_data1()
-    print("loading second dataset...")
-    train_images2, train_labels2, test_images2, test_labels2 = get_data2()
+    print("Preparing dataset...")
+    images1, age_labels1, gender_labels1 = process_dataset1()
+    images2, age_labels2, gender_labels2 = process_dataset2()
 
-    print("preparing dataset...")
-    train_images = np.concatenate((train_images1, train_images2))
-    train_labels = np.concatenate((train_labels1, train_labels2))
-    test_images = np.concatenate((test_images1, test_images2))
-    test_labels = np.concatenate((test_labels1, test_labels2))
+    images = np.concatenate((images1, images2))
+    age_labels = np.concatenate((age_labels1, age_labels2))
+    gender_labels = np.concatenate((gender_labels1, gender_labels2))
 
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
-    test_images = np.array(test_images)
-    test_labels = np.array(test_labels)
-
-    return train_images, train_labels, test_images, test_labels
-
-
-def get_data1():
-    train_labels = []
-    train_images = []
-    test_images = []
-    test_labels = []
-
-    get_photos(file="D:\\Nastavenia\\Dokumenty\\STU\\4rocnik\\neu\\ns\\python\\photos\\image_sets\\train.txt",
-               images=train_images, labels=train_labels)
-    get_photos(file="D:\\Nastavenia\\Dokumenty\\STU\\4rocnik\\neu\\ns\\python\\photos\\image_sets\\val.txt",
-               images=test_images, labels=test_labels)
-
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
-    test_images = np.array(test_images)
-    test_labels = np.array(test_labels)
-
-    return train_images, train_labels, test_images, test_labels
-
-
-def get_data2():
-    train_labels = []
-    train_images = []
-    test_images = []
-    test_labels = []
-
-    # DIMENSION (200,200,3)
-    images = [prep_img(imread(file)) for file in glob.glob("..\\photos\\mixed\\UTKFace\\*.jpg")]
-    labels = [get_age_gender(file) for file in glob.glob("..\\photos\\mixed\\UTKFace\\*.jpg")]
-
-    pom = list(zip(images, labels))
-    ra.shuffle(pom)
-    images, labels = zip(*pom)
-
-    for x in range(0, int(len(images) * 3 / 4)):
-        train_images.append(images[x])
-        train_labels.append(labels[x])
-    for x in range(int(len(images) * 3 / 4), len(images)):
-        test_images.append(images[x])
-        test_labels.append(labels[x])
-
-    train_images = np.array(train_images)
-    train_labels = np.array(train_labels)
-    test_images = np.array(test_images)
-    test_labels = np.array(test_labels)
-
-    return train_images, train_labels, test_images, test_labels
+    print("Preparing train and test data...")
+    return prepare_data(images, age_labels, gender_labels)

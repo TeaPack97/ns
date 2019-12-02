@@ -1,26 +1,28 @@
 from src.import_data import *
 from keras.models import load_model
 
-FILE = "D:\\Nastavenia\\Dokumenty\\STU\\4rocnik\\neu\\ns\\21_0_1594562.jpg"
 
+def guess():
+    images = []
+    age_labels = []
+    gender_labels = []
 
-def max_idx(array):
-    idx = 0
-    for x in range(len(array)):
-        if array[idx] < array[x]:
-            idx = x
-    return idx
+    for file in tqdm(glob.glob("..\\photos\\guess\\*.jpg")):
+        filename = basename(file)
+        images.append(prep_img(file=file))
+        age_labels.append(get_age(file=filename))
+        gender_labels.append(get_gender(file=filename))
 
-
-def guess(file):
-    img = [prep_img(imread(file)), prep_img(imread(file))]
-    img = np.array(img)
+    images = np.array(images)
+    age_labels = np.array(age_labels)
+    gender_labels = np.array(gender_labels)
 
     model = load_model("model.h5", compile=True)
-    score = model.predict(img, verbose=0)
+    metrics = model.metrics_names
+    score = model.evaluate(images, {"age": age_labels, "gender": gender_labels})
 
-    print("REALNA HODNOTA: ", get_age_gender(file))
-    print("PREDICT: ", max_idx(array=score[0]))
+    for m in range(len(metrics)):
+        print(metrics[m], ": %1.2f " % score[m])
 
 
-guess(file=FILE)
+guess()
