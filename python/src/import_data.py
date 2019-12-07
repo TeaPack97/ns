@@ -103,7 +103,7 @@ def process_dataset3():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset3\\*.jpg")[:5]):
+    for file in tqdm(glob.glob("..\\photos\\dataset3\\*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(get_age(file=filename))
@@ -117,7 +117,7 @@ def process_dataset2():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")[:5]):
+    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(get_age(file=filename))
@@ -131,7 +131,7 @@ def process_dataset1():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")[:5]):
+    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(decide_age(age=filename[6:8]))
