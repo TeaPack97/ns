@@ -6,7 +6,7 @@ from src.import_data import *
 import matplotlib.pyplot as plt
 
 BATCH_SIZE = 64
-EPOCHS = 20
+EPOCHS = 1
 
 train_images, train_age_labels, train_gender_labels, test_images, test_age_labels, test_gender_labels = get_data()
 
@@ -14,8 +14,8 @@ model = create_model(HEIGHT, WIDTH, 8)
 
 model.compile(
     optimizer=Adam(learning_rate=0.001),
-    loss={"age": "sparse_categorical_crossentropy", "gender": "sparse_categorical_crossentropy"},
-    metrics=['accuracy']
+    loss={"age": "sparse_categorical_crossentropy", "gender": "binary_crossentropy"},
+    metrics={"age": ["accuracy", "categorical_accuracy"], "gender": "accuracy"}
 )
 
 callbacks = [
@@ -24,13 +24,6 @@ callbacks = [
         histogram_freq=1,
         profile_batch=0)
 ]
-
-#history = model.fit_generator(
-#    generator=train_gen,
-#    epochs=EPOCHS,
-#    callbacks=callbacks,
-#    validation_data=test_gen
-#)
 
 history = model.fit(
     x=train_images,
@@ -44,7 +37,6 @@ history = model.fit(
 
 model.save("model.h5")
 model.summary()
-
 plt.plot(history.history['age_accuracy'])
 plt.plot(history.history['val_age_accuracy'])
 plt.title('Model Age Accuracy')
@@ -53,6 +45,17 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 plt.savefig('model_age_accuracy.png')
+plt.clf()
+
+plt.plot(history.history['age_categorical_accuracy'])
+plt.plot(history.history['val_age_categorical_accuracy'])
+plt.title('Model Age Categorical Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
+plt.savefig('model_age_categorical_accuracy.png')
+plt.clf()
 
 plt.plot(history.history['gender_accuracy'])
 plt.plot(history.history['val_gender_accuracy'])
@@ -62,6 +65,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 plt.savefig('model_gender_accuracy.png')
+plt.clf()
 
 plt.plot(history.history['age_loss'])
 plt.plot(history.history['val_age_loss'])
@@ -71,6 +75,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 plt.savefig('model_age_loss.png')
+plt.clf()
 
 plt.plot(history.history['gender_loss'])
 plt.plot(history.history['val_gender_loss'])
@@ -80,3 +85,4 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 plt.savefig('model_gender_loss.png')
+plt.clf()

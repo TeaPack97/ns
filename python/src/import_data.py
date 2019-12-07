@@ -5,8 +5,8 @@ from tqdm import tqdm
 import random as ra
 from cv2 import *
 
-ZENA = 1
 MUZ = 0
+ZENA = 1
 HEIGHT = 64
 WIDTH = 64
 DIM = (HEIGHT, WIDTH)
@@ -98,12 +98,26 @@ def prepare_data(images, age_labels, gender_labels):
     return train_images, train_age_labels, train_gender_labels, test_images, test_age_labels, test_gender_labels
 
 
+def process_dataset3():
+    images = []
+    age_labels = []
+    gender_labels = []
+
+    for file in tqdm(glob.glob("..\\photos\\dataset3\\*.jpg")[:5]):
+        filename = basename(file)
+        images.append(prep_img(file=file))
+        age_labels.append(get_age(file=filename))
+        gender_labels.append(get_gender(file=filename))
+
+    return images, age_labels, gender_labels
+
+
 def process_dataset2():
     images = []
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")):
+    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")[:5]):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(get_age(file=filename))
@@ -117,7 +131,7 @@ def process_dataset1():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")):
+    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")[:5]):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(decide_age(age=filename[6:8]))
@@ -130,10 +144,11 @@ def get_data():
     print("Preparing dataset...")
     images1, age_labels1, gender_labels1 = process_dataset1()
     images2, age_labels2, gender_labels2 = process_dataset2()
+    images3, age_labels3, gender_labels3 = process_dataset3()
 
-    images = np.concatenate((images1, images2))
-    age_labels = np.concatenate((age_labels1, age_labels2))
-    gender_labels = np.concatenate((gender_labels1, gender_labels2))
+    images = np.concatenate((images1, images2, images3))
+    age_labels = np.concatenate((age_labels1, age_labels2, age_labels3))
+    gender_labels = np.concatenate((gender_labels1, gender_labels2, gender_labels3))
 
     print("Preparing train and test data...")
     return prepare_data(images, age_labels, gender_labels)

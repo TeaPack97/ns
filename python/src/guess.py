@@ -20,6 +20,11 @@ def guess():
     model = load_model("model.h5", compile=True)
     metrics = model.metrics_names
     score = model.evaluate(images, {"age": age_labels, "gender": gender_labels})
+    s = model.predict(images)
+
+    print(metrics)
+    print(score)
+    print(s)
 
     for m in range(len(metrics)):
         print(metrics[m], ": %1.2f " % score[m])
