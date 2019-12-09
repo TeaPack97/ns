@@ -103,7 +103,7 @@ def process_dataset3():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset3\\*.jpg")):
+    for file in tqdm(glob.glob("../photos/dataset3/*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(get_age(file=filename))
@@ -117,7 +117,7 @@ def process_dataset2():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset2\\*.jpg")):
+    for file in tqdm(glob.glob("../photos/dataset2/*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(get_age(file=filename))
@@ -131,12 +131,26 @@ def process_dataset1():
     age_labels = []
     gender_labels = []
 
-    for file in tqdm(glob.glob("..\\photos\\dataset1\\*.jpg")):
+    for file in tqdm(glob.glob("../photos/dataset1/*.jpg")):
         filename = basename(file)
         images.append(prep_img(file=file))
         age_labels.append(decide_age(age=filename[6:8]))
         gender_labels.append(decide_gender(number=filename[0:5]))
 
+    return images, age_labels, gender_labels
+
+
+def get_all_data():
+    print("Preparing dataset...")
+    images1, age_labels1, gender_labels1 = process_dataset1()
+    images2, age_labels2, gender_labels2 = process_dataset2()
+    images3, age_labels3, gender_labels3 = process_dataset3()
+
+    images = np.concatenate((images1, images2, images3))
+    age_labels = np.concatenate((age_labels1, age_labels2, age_labels3))
+    gender_labels = np.concatenate((gender_labels1, gender_labels2, gender_labels3))
+
+    print("Preparing train and test data...")
     return images, age_labels, gender_labels
 
 
